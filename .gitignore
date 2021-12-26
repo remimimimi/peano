@@ -1,0 +1,7 @@
+/theorems/*.glob
+/theorems/*.vo
+/theorems/*.vok
+/theorems/*.vos
+/theorems/.*.aux
+/theorems/.*.d
+/theorems/Makefile*
