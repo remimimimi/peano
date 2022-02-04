@@ -20,7 +20,7 @@ Lemma o_plus_a : forall a, O +++ a = a.
 Proof. done. Qed.
 
 Lemma a_plus_o : forall a, a +++ O = a.
-Proof. by elim=>> //= ->. Qed.
+Proof. by elim => > //= ->. Qed.
 
 Example two_plus_two : S (S O) +++ S (S (S O)) = S (S (S (S (S O)))).
 Proof. done. Qed.
@@ -38,20 +38,17 @@ Lemma plus_assoc : forall a b c, a +++ (b +++ c) = (a +++ b) +++ c.
 Proof.
   move => a + c; elim=> /= [| b IHb].
   - by rewrite a_plus_o.
-  - by rewrite a_plus_s_b;
-       rewrite IHb;
-       rewrite a_plus_s_b;
-       rewrite s_a_plus_b.
+  - by rewrite a_plus_s_b IHb a_plus_s_b s_a_plus_b.
 Qed.
 
 Lemma s_a_eq_s_b : forall a b, S a = S b -> a = b.
 Proof.
   (* TODO: replace inversion by ssreflect more natural (haha) approach *)
-  move =>> succ_eq; by inversion succ_eq.
+  move => > succ_eq; by inversion succ_eq.
 Qed.
 
 Lemma a_eq_b : forall a b, a = b -> S a = S b.
-Proof. by move =>> ->. Qed.
+Proof. by move => > ->. Qed.
 
 Fixpoint mul (n : natural) (m : natural) : natural :=
   match n with
@@ -73,7 +70,7 @@ Qed.
 
 Lemma s_o_mul_a : forall a, S O *** a = a.
 Proof.
-  move =>> //=; by rewrite a_plus_o.
+  move => > //=; by rewrite a_plus_o.
 Qed.
 
 Lemma mul_comm : forall a b, a *** b = b *** a.
@@ -97,11 +94,6 @@ Qed.
 Lemma mul_assoc : forall a b c, a *** (b *** c) = (a *** b) *** c.
 Proof.
   move => a b +; elim => [| c IHc].
-  - by do 3! rewrite a_mul_o.
-  - by do 2! rewrite a_mul_s_b;
-       symmetry;
-       rewrite mul_comm;
-       rewrite mul_distr;
-       rewrite mul_comm;
-       rewrite IHc.
+  - by rewrite 3! a_mul_o.
+  - by rewrite 2! a_mul_s_b; symmetry; rewrite mul_comm mul_distr mul_comm IHc.
 Qed.
