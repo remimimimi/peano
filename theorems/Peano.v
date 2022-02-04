@@ -1,10 +1,6 @@
-(* Require Import Bool Arith List Cpdt.CpdtTactics. *)
-(* Require Import Cpdt.CpdtTactics. *)
-Require Import Bool List Vectors.Vector ssreflect.
+Require Import ssreflect.
 Set Implicit Arguments.
 Set Asymmetric Patterns.
-
-(* Inductive Natural := O | S Natural. *)
 
 Inductive natural : Set :=
   | O : natural
@@ -24,7 +20,7 @@ Lemma o_plus_a : forall a, O +++ a = a.
 Proof. done. Qed.
 
 Lemma a_plus_o : forall a, a +++ O = a.
-Proof. elim => [| a IHa]; by [|simpl; rewrite IHa]. Qed.
+Proof. by elim=>> //= ->. Qed.
 
 Example two_plus_two : S (S O) +++ S (S (S O)) = S (S (S (S (S O)))).
 Proof. done. Qed.
@@ -36,29 +32,26 @@ Proof.
 Qed.
 
 Lemma s_a_plus_b : forall a b, S a +++ b = S (a +++ b).
-Proof.
-  elim => [| ? ?] ?; by [trivial].
-Qed.
+Proof. done. Qed.
 
 Lemma plus_assoc : forall a b c, a +++ (b +++ c) = (a +++ b) +++ c.
 Proof.
-  move => a b c; move : b.
-  elim => [| b IHb].
+  move => a + c; elim=> /= [| b IHb].
   - by rewrite a_plus_o.
   - by rewrite a_plus_s_b;
-       do 2! rewrite s_a_plus_b;
-       rewrite  a_plus_s_b;
-       rewrite IHb.
+       rewrite IHb;
+       rewrite a_plus_s_b;
+       rewrite s_a_plus_b.
 Qed.
 
 Lemma s_a_eq_s_b : forall a b, S a = S b -> a = b.
+Proof.
   (* TODO: replace inversion by ssreflect more natural (haha) approach *)
-  move => a b succ_eq; by inversion succ_eq.
+  move =>> succ_eq; by inversion succ_eq.
 Qed.
 
 Lemma a_eq_b : forall a b, a = b -> S a = S b.
-  move => a b abeq; by rewrite abeq.
-Qed.
+Proof. by move =>> ->. Qed.
 
 Fixpoint mul (n : natural) (m : natural) : natural :=
   match n with
@@ -80,7 +73,7 @@ Qed.
 
 Lemma s_o_mul_a : forall a, S O *** a = a.
 Proof.
-  move => a; by simpl; rewrite a_plus_o.
+  move =>> //=; by rewrite a_plus_o.
 Qed.
 
 Lemma mul_comm : forall a b, a *** b = b *** a.
@@ -90,21 +83,20 @@ Qed.
 
 Lemma s_a_mul_b : forall a b, S a *** b = b +++ (b *** a).
 Proof.
-  elim => [| a IHa] b;
-    by simpl; by [rewrite a_mul_o | rewrite a_mul_s_b mul_comm].
+  elim => /= [| a IHa] b;
+    by [rewrite a_mul_o | rewrite a_mul_s_b mul_comm].
 Qed.
 
 Lemma mul_distr : forall a b c, a *** (b +++ c) = a *** b +++ a *** c.
 Proof.
-  move => a b c; move : b.
-  elim => [| b IHb].
+  move => a + c; elim => [| b IHb].
   - by rewrite a_mul_o.
   - by rewrite a_mul_s_b -plus_assoc -IHb -a_mul_s_b -s_a_plus_b.
 Qed.
 
 Lemma mul_assoc : forall a b c, a *** (b *** c) = (a *** b) *** c.
 Proof.
-  move => a b c; elim: c => [| c IHc].
+  move => a b +; elim => [| c IHc].
   - by do 3! rewrite a_mul_o.
   - by do 2! rewrite a_mul_s_b;
        symmetry;
